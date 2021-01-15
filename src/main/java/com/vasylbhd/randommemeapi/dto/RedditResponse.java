@@ -1,12 +1,11 @@
 package com.vasylbhd.randommemeapi.dto;
 
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-
-@Value
-public class RedditResponse {
-    String postUrl;
-    String title;
-    String message;
-    String author;
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public record RedditResponse(
+        String postUrl,
+        String title,
+        String message,
+        String author) {
 }

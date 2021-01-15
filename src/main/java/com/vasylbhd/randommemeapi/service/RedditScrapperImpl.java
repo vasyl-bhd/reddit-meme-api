@@ -1,6 +1,7 @@
 package com.vasylbhd.randommemeapi.service;
 
 import com.vasylbhd.randommemeapi.dto.RedditResponse;
+import lombok.RequiredArgsConstructor;
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.models.Listing;
 import net.dean.jraw.models.SearchSort;
@@ -9,23 +10,20 @@ import net.dean.jraw.models.TimePeriod;
 import net.dean.jraw.pagination.Paginator;
 import net.dean.jraw.pagination.SearchPaginator;
 import net.dean.jraw.references.SubredditReference;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static java.util.function.Predicate.not;
 
 @Service
+@RequiredArgsConstructor
 public class RedditScrapperImpl implements RedditScrapper {
 
-    private static final List<String> coolSubreddits = List.of(
+    private static final List<String> COOL_SUBREDDITS = List.of(
             "memes",
             "dankmemes",
-            "pequelmemes",
+            "PrequelMemes",
             "evangelionmemes",
             "JoJoMemes",
             "ProgrammerHumor",
@@ -34,66 +32,51 @@ public class RedditScrapperImpl implements RedditScrapper {
 
     private final RedditClient redditClient;
 
-    public RedditScrapperImpl(RedditClient redditClient) {
-        this.redditClient = redditClient;
-    }
-
     @Override
-    public List<RedditResponse> getMemes(String subreddit, int limit) {
-        return Optional.ofNullable(subreddit)
-                .map(sr -> getBySubreddit(subreddit, limit))
-                .orElseGet(() -> getByRandomSubreddit(limit));
+    public RedditResponse getRandomMeme() {
+        return getByRandomSubreddit();
     }
 
-    private RedditResponse fromSubmission(Submission submission) {
+    private RedditResponse getByRandomSubreddit() {
+        return getResponse(getSubreddit());
+    }
+
+    private SubredditReference getSubreddit() {
+        return redditClient.subreddit(COOL_SUBREDDITS.get(getRandomIndex(COOL_SUBREDDITS.size())));
+    }
+
+    private RedditResponse getResponse(SubredditReference subredditReference) {
+        SearchPaginator paginator = subredditReference
+                .search()
+                .limit(100)
+                .query("self:no")
+                .syntax(SearchPaginator.QuerySyntax.PLAIN)
+                .sorting(SearchSort.HOT)
+                .timePeriod(TimePeriod.MONTH)
+                .build();
+
+        return getFromPage(paginator);
+    }
+
+    private RedditResponse getFromPage(Paginator<Submission> pages) {
+        Listing<Submission> submissions = pages.next();
+        return getRedditResponse(submissions);
+    }
+
+    @NotNull
+    private RedditResponse getRedditResponse(Listing<Submission> next) {
+        Submission submission = next.get(getRandomIndex(next.size()));
+
+        return submissionToRedditResponse(submission);
+    }
+
+    private RedditResponse submissionToRedditResponse(Submission submission) {
         return new RedditResponse(
                 submission.getPermalink(),
                 submission.getTitle(),
                 submission.getUrl(),
                 submission.getAuthor()
         );
-    }
-
-    private List<RedditResponse> fromSubmissions(Paginator<Submission> pages, int limit) {
-        List<Listing<Submission>> accumulate = pages.accumulate(1);
-        return IntStream.range(0, limit)
-                .mapToObj(i -> accumulate.get(getRandomIndex(accumulate.size())))
-                .filter(not(List::isEmpty))
-                .map(list -> list.get(getRandomIndex(list.size())))
-                .map(this::fromSubmission)
-                .collect(Collectors.toList());
-    }
-
-    private List<RedditResponse> getResponse(SubredditReference subredditReference, int limit) {
-        SearchPaginator build = subredditReference
-                .search()
-                .limit(75)
-                .query("self:no")
-                .syntax(SearchPaginator.QuerySyntax.PLAIN)
-                .sorting(SearchSort.HOT)
-                .timePeriod(TimePeriod.ALL)
-                .build();
-
-        return fromSubmissions(build, limit);
-    }
-
-    private List<RedditResponse> getBySubreddit(String subreddit, int limit) {
-        return getResponse(getReferenceForSubreddit(subreddit), limit);
-    }
-
-    private List<RedditResponse> getByRandomSubreddit(int limit) {
-        return getResponse(getSubReferenceForRandomMeme(), limit);
-    }
-
-    private SubredditReference getSubReferenceForRandomMeme() {
-        return redditClient.subreddits(
-                coolSubreddits.get(0),
-                coolSubreddits.get(1),
-                coolSubreddits.subList(1, coolSubreddits.size()).toArray(new String[0]));
-    }
-
-    private SubredditReference getReferenceForSubreddit(String subreddit) {
-        return redditClient.subreddit(subreddit);
     }
 
     private int getRandomIndex(int listSize) {

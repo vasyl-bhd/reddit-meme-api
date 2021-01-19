@@ -18,8 +18,7 @@ steps:
   - name: copy
     image: alpine
     commands:
-      - cp /drone/src/random-meme-api/target/random-meme-api-0.0.1-SNAPSHOT.jar /drone/src/
-      - cp /drone/src/random-meme-api/Dockerfile /drone/src/
+      - cp /drone/src/target/random-meme-api-0.0.1-SNAPSHOT.jar /drone/src/
 
   - name: push
     image: plugins/docker

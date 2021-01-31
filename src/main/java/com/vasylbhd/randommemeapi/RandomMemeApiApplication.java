@@ -1,13 +1,11 @@
 package com.vasylbhd.randommemeapi;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import io.micronaut.runtime.Micronaut;
 
-@SpringBootApplication
 public class RandomMemeApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RandomMemeApiApplication.class, args);
+		Micronaut.run(RandomMemeApiApplication.class, args);
 	}
 
 }

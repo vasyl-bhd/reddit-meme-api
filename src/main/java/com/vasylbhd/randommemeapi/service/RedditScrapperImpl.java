@@ -11,12 +11,12 @@ import net.dean.jraw.pagination.Paginator;
 import net.dean.jraw.pagination.SearchPaginator;
 import net.dean.jraw.references.SubredditReference;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
 
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Service
+@Singleton
 @RequiredArgsConstructor
 public class RedditScrapperImpl implements RedditScrapper {
 

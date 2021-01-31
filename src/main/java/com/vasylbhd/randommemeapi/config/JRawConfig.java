@@ -1,17 +1,17 @@
 package com.vasylbhd.randommemeapi.config;
 
+import io.micronaut.context.annotation.Factory;
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.http.NetworkAdapter;
 import net.dean.jraw.http.OkHttpNetworkAdapter;
 import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.oauth.Credentials;
 import net.dean.jraw.oauth.OAuthHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
+import javax.inject.Singleton;
 import java.util.UUID;
 
-@Configuration
+@Factory
 public class JRawConfig {
     private final RedditConfigProperties properties;
 
@@ -23,7 +23,7 @@ public class JRawConfig {
         return new UserAgent("memegenerator", "com.vasylbhd.randommemeapi", "v0.1", "henichaer");
     }
 
-    @Bean
+    @Singleton
     public RedditClient redditClient() {
         Credentials credentials = Credentials.userless(
                 properties.getClientId(),

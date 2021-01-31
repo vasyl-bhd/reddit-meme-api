@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>io.micronaut</groupId>
+		<artifactId>micronaut-parent</artifactId>
+		<version>2.3.0</version>
 	</parent>
+
 	<groupId>com.vasylbhd</groupId>
 	<artifactId>random-meme-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -15,67 +15,108 @@
 	<description>Reddit scrapper for random memes!</description>
 
 	<properties>
-		<java.version>15</java.version>
 		<jraw.version>1.1.0</jraw.version>
+		<jdk.version>15</jdk.version>
+		<release.version>15</release.version>
+		<micronaut.version>2.3.0</micronaut.version>
+		<exec.mainClass>com.vasylbhd.randommemeapi.RandomMemeApiApplication</exec.mainClass>
+		<micronaut.runtime>netty</micronaut.runtime>
 	</properties>
-
 	<dependencies>
+
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>io.micronaut</groupId>
+			<artifactId>micronaut-inject</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jetty</artifactId>
+			<groupId>io.micronaut</groupId>
+			<artifactId>micronaut-validation</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micronaut</groupId>
+			<artifactId>micronaut-http-server-netty</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micronaut</groupId>
+			<artifactId>micronaut-http-client</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micronaut</groupId>
+			<artifactId>micronaut-runtime</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.dean.jraw</groupId>
 			<artifactId>JRAW</artifactId>
 			<version>${jraw.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>6.1.2.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+				<groupId>io.micronaut.build</groupId>
+				<artifactId>micronaut-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>15</source>
-					<target>15</target>
-					<compilerArgs>--enable-preview</compilerArgs>
+					<!-- Uncomment to enable incremental compilation -->
+					<!-- <useIncrementalCompilation>false</useIncrementalCompilation> -->
+					<annotationProcessorPaths combine.self="override">
+						<path>
+							<!-- must precede micronaut-inject-java -->
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>io.micronaut</groupId>
+							<artifactId>micronaut-inject-java</artifactId>
+							<version>${micronaut.version}</version>
+						</path>
+						<path>
+							<groupId>io.micronaut</groupId>
+							<artifactId>micronaut-validation</artifactId>
+							<version>${micronaut.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<compilerArgs>
+						<arg>-Amicronaut.processing.group=com.vasylb</arg>
+						<arg>-Amicronaut.processing.module=randommemeapi</arg>
+						<arg>--enable-preview</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<repositories>
 		<repository>
-			<id>jcenter</id>
-			<url>https://jcenter.bintray.com/</url>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>jcenter.bintray.com</id>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
 
